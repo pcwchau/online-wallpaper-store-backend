@@ -7,6 +7,11 @@ const app = express();
 
 app.use(cors());
 
+// /images?folder={folder_name}
+// 200 {images: ["url1", "url2", ...]}
+// 400 {error: "Missing or invalid 'folder' parameter."}
+// 404 {error: "No images found."}
+// 500 {error: "Failed to get images."}
 app.get("/images", async (req, res) => {
   const folder = req.query.folder;
 
@@ -24,8 +29,8 @@ app.get("/images", async (req, res) => {
 
     res.json({ images: urls });
   } catch (err) {
-    console.error("Failed to list objects:", err);
-    res.status(500).json({ error: "Failed to list images." });
+    console.error("Failed to get images:", err);
+    res.status(500).json({ error: "Failed to get images." });
   }
 });
 
