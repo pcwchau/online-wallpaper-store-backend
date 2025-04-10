@@ -1,8 +1,11 @@
 import express from "express";
+import cors from "cors";
 import "dotenv/config";
 import { GetAllFilesURL } from "./aws-service.js";
 
 const app = express();
+
+app.use(cors());
 
 app.get("/images", async (req, res) => {
   const folder = req.query.folder;
