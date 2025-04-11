@@ -7,6 +7,11 @@ const app = express();
 
 app.use(cors());
 
+// 200 {"timestamp":"2025-04-11T15:11:11.868Z"}
+app.get("/", (req, res) => {
+  res.json({ timestamp: new Date().toISOString() });
+});
+
 // /images?folder={folder_name}
 // 200 {images: ["url1", "url2", ...]}
 // 400 {error: "Missing or invalid 'folder' parameter."}

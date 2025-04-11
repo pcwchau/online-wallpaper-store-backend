@@ -14,7 +14,7 @@ export async function listObjects(folder) {
     const command = new ListObjectsV2Command({
       Bucket: process.env.S3_BUCKET_NAME,
       Prefix: folder,
-      MaxKeys: 10,
+      MaxKeys: 30,
     });
 
     const response = await s3.send(command);
