@@ -8,6 +8,7 @@ import "dotenv/config";
 import { GetAllFilesURL } from "./aws-service.js";
 
 const app = express();
+const port = process.env.WEB_SERVER_PORT || 443;
 
 app.use(cors());
 
