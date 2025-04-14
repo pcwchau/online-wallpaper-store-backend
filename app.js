@@ -3,6 +3,7 @@ import cors from "cors";
 import https from "https";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import "dotenv/config";
 import { GetAllFilesURL } from "./aws-service.js";
 
@@ -42,6 +43,8 @@ app.get("/images", async (req, res) => {
   }
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const options = {
   key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
   cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
