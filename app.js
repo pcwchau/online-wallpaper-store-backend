@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import https from "https";
+import fs from "fs";
+import path from "path";
 import "dotenv/config";
 import { GetAllFilesURL } from "./aws-service.js";
 
@@ -39,8 +42,19 @@ app.get("/images", async (req, res) => {
   }
 });
 
-app.listen(process.env.WEB_SERVER_PORT, () => {
-  console.log(
-    `Server running at http://localhost:${process.env.WEB_SERVER_PORT}`
-  );
+const options = {
+  key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
+};
+
+const server = https.createServer(options, app);
+
+server.listen(port, () => {
+  console.log(`App listening on https://localhost:${port}`);
 });
+
+// app.listen(process.env.WEB_SERVER_PORT, () => {
+//   console.log(
+//     `Server running at http://localhost:${process.env.WEB_SERVER_PORT}`
+//   );
+// });
