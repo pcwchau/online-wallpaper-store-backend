@@ -17,16 +17,31 @@ pm2 restart ecosystem.config.js --env development
 
 # Stop the web server
 pm2 stop all
+
+# Check logging
+pm2 logs app1
+
+# Check the web server status
+pm2 list
 ```
 
 # Deployment
 
 ```sh
+# Go to the project directory
+
 # Start the web server (env_production in ecosystem.config.js)
 pm2 start ecosystem.config.js --env production
 
 # Get update from Git (access token is cached) and restart the web server
-git pull; pm2 restart ecosystem.config.js --env production
+git pull
+npm install # if necessary
+pm2 restart ecosystem.config.js --env production
+
+# Get SSL Certificates (ensure port 80 is open)
+sudo certbot certonly --standalone -d web.beshinegroup.com
+
+# Others please refer to development CLI
 ```
 
 Useful links:

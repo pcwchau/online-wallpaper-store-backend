@@ -55,10 +55,16 @@ app.get("/images", async (req, res) => {
 
 // START THE WEB SERVER
 if (process.env.NODE_ENV === "production") {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  // const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const httpsOptions = {
-    key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
-    cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
+    // key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
+    // cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
+    key: fs.readFileSync(
+      "/etc/letsencrypt/live/web.beshinegroup.com/privkey.pem"
+    ),
+    cert: fs.readFileSync(
+      "/etc/letsencrypt/live/web.beshinegroup.com/fullchain.pem"
+    ),
   };
 
   https
