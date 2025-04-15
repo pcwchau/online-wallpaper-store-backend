@@ -1,16 +1,25 @@
 import express from "express";
 import cors from "cors";
+import http from "http";
 import https from "https";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import "dotenv/config";
 import { GetAllFilesURL } from "./aws-service.js";
+import { logger } from "./logger.js";
 
 const app = express();
-const port = process.env.WEB_SERVER_PORT || 443;
 
 app.use(cors());
+
+app.use((req, res, next) => {
+  const { method, url } = req;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const userAgent = req.headers["user-agent"];
+
+  logger.info(`Request: ${method} ${url} from ${ip} - ${userAgent}`);
+  next();
+});
 
 // 200 {"timestamp":"2025-04-11T15:11:11.868Z"}
 app.get("/", (req, res) => {
@@ -39,26 +48,33 @@ app.get("/images", async (req, res) => {
 
     res.json({ images: urls });
   } catch (err) {
-    console.error("Failed to get images:", err);
+    logger.error("Failed to get images:", err);
     res.status(500).json({ error: "Failed to get images." });
   }
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const options = {
-  key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
-  cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
-};
+// START THE WEB SERVER
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const httpsOptions = {
+    key: fs.readFileSync(path.join(__dirname, "localhost-key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "localhost.pem")),
+  };
 
-const server = https.createServer(options, app);
-
-server.listen(port, () => {
-  console.log(`App listening on https://localhost:${port}`);
-});
-
-// app.listen(process.env.WEB_SERVER_PORT, () => {
-//   console.log(
-//     `Server running at http://localhost:${process.env.WEB_SERVER_PORT}`
-//   );
-// });
+  https
+    .createServer(httpsOptions, app)
+    .listen(process.env.WEB_SERVER_PORT, () => {
+      logger.info(
+        `[Production] HTTPS server running at https://localhost:${process.env.WEB_SERVER_PORT}`
+      );
+    });
+} else if (process.env.NODE_ENV === "development") {
+  http.createServer(app).listen(process.env.WEB_SERVER_PORT, () => {
+    logger.info(
+      `[Development] HTTP server running at http://localhost:${process.env.WEB_SERVER_PORT}`
+    );
+  });
+} else {
+  logger.error("NODE_ENV must be either 'production' or 'development'.");
+  process.exit(1);
+}
