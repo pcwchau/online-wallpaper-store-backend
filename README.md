@@ -21,6 +21,9 @@ pm2 stop all
 # Check logging
 pm2 logs app1
 
+# Clear logging
+pm2 flush
+
 # Check the web server status
 pm2 list
 ```
@@ -29,6 +32,7 @@ pm2 list
 
 ```sh
 # Go to the project directory
+cd /home/ec2-user/online-wallpaper-store-backend/
 
 # Start the web server (env_production in ecosystem.config.js)
 pm2 start ecosystem.config.js --env production
@@ -38,8 +42,9 @@ git pull
 npm install # if necessary
 pm2 restart ecosystem.config.js --env production
 
-# Get SSL Certificates (ensure port 80 is open)
+# Request SSL Certificates (ensure port 80 is open)
 sudo certbot certonly --standalone -d web.beshinegroup.com
+# After receiving SSL cert, ensure they can be accessed
 
 # Others please refer to development CLI
 ```
