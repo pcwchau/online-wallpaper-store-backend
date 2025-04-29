@@ -15,9 +15,8 @@ app.use(cors());
 app.use((req, res, next) => {
   const { method, url } = req;
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  const userAgent = req.headers["user-agent"];
 
-  logger.info(`Request: ${method} ${url} from ${ip} - ${userAgent}`);
+  logger.info(`${method} Request: URL[${url}] IP [${ip}]`);
   next();
 });
 

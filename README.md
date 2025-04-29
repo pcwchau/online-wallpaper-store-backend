@@ -37,14 +37,15 @@ cd /home/ec2-user/online-wallpaper-store-backend/
 # Start the web server (env_production in ecosystem.config.js)
 pm2 start ecosystem.config.js --env production
 
-# Get update from Git (access token is cached) and restart the web server
+# Get update from Git (access token is cached)
 git pull
 npm install # if necessary
-pm2 restart ecosystem.config.js --env production
+pm2 restart ecosystem.config.js --env production # restart the web server
 
 # Request SSL Certificates (ensure port 80 is open)
 sudo certbot certonly --standalone -d web.beshinegroup.com
 # After receiving SSL cert, ensure they can be accessed
+# Certificates should be renewed automatically
 
 # Others please refer to development CLI
 ```
