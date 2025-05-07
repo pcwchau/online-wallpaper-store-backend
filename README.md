@@ -2,6 +2,11 @@
 
 # Development
 
+| Service            | Local Port |
+|--------------------|------------|
+| Node.js web server | 3001       |
+| Docker MySQL       | 3002       |
+
 ```sh
 # Initialize the project for the first time
 npm install
