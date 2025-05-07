@@ -10,7 +10,7 @@ function formatMessage(level, message) {
   return `${timestamp} [${levels[level]}] ${message}`;
 }
 
-export const logger = {
+const logger = {
   info(message) {
     const formatted = formatMessage("info", message);
     console.log(formatted);
@@ -33,3 +33,5 @@ export const logger = {
     }
   },
 };
+
+export default logger;

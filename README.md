@@ -14,14 +14,19 @@ npm install
 # Install pm2 if it is not yet installed
 npm install -g pm2
 
-# Start the web server (env_development in ecosystem.config.js)
-pm2 start ecosystem.config.js --env development
+# Copy /template/ecosystem.config.js to / and update the config
+
+# Start the web server
+pm2 start ecosystem.config.cjs
 
 # Restart the web server after update
-pm2 restart ecosystem.config.js --env development
+pm2 restart ecosystem.config.cjs
 
 # Stop the web server
-pm2 stop all
+pm2 stop app1
+
+# Delete the web server
+pm2 delete app1
 
 # Check logging
 pm2 logs app1
@@ -39,20 +44,17 @@ pm2 list
 # Go to the project directory
 cd /home/ec2-user/online-wallpaper-store-backend/
 
-# Start the web server (env_production in ecosystem.config.js)
-pm2 start ecosystem.config.js --env production
+# Follow the development guideline
 
 # Get update from Git (access token is cached)
 git pull
 npm install # if necessary
-pm2 restart ecosystem.config.js --env production # restart the web server
+pm2 restart ecosystem.config.cjs  # restart the web server
 
 # Request SSL Certificates (ensure port 80 is open)
 sudo certbot certonly --standalone -d web.beshinegroup.com
 # After receiving SSL cert, ensure they can be accessed
 # Certificates should be renewed automatically
-
-# Others please refer to development CLI
 ```
 
 Useful links:
