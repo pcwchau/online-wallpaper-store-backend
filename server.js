@@ -1,7 +1,7 @@
 import fs from "fs";
 import http from "http";
 import https from "https";
-import logger from "./src/logger.js";
+import logger from "./src/utils/logger.js";
 import app from "./src/app.js";
 
 if (process.env.NODE_ENV === "production") {

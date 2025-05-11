@@ -9,16 +9,17 @@
 
 ```sh
 # Initialize the project for the first time
+# Copy /template/ecosystem.config.js to / and update the config
 npm install
-
-# Install pm2 if it is not yet installed
 npm install -g pm2
 
-# Copy /template/ecosystem.config.js to / and update the config
 
-# Start the web server
+# Start the DB and the web server
+docker compose up -d
 pm2 start ecosystem.config.cjs
+```
 
+```sh
 # Restart the web server after update
 pm2 restart ecosystem.config.cjs
 
