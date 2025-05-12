@@ -11,9 +11,9 @@ const s3 = new S3Client({
 
 // folder: "example/"
 export async function uploadObjectsS3(file, folder) {
-  const fileKey = folder + file.originalname;
-  logger.info(`uploadObjectsS3 [START] - File key [${fileKey}]`);
   try {
+    const fileKey = folder + file.originalname;
+    logger.info(`uploadObjectsS3 [START] - File key [${fileKey}]`);
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: fileKey,
@@ -22,7 +22,7 @@ export async function uploadObjectsS3(file, folder) {
     });
     await s3.send(command);
     logger.info(`uploadObjectsS3 [SUCCESS] - File key [${fileKey}]`);
-    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_BUCKET_NAME}.amazonaws.com/${fileKey}`;
+    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
   } catch (error) {
     logger.error(`uploadObjectsS3 [FAIL] - ${error}`);
   }

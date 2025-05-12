@@ -1,69 +1,45 @@
 import logger from "../utils/logger.js";
 import { uploadObjectsS3 } from "../api/aws.js";
-import { db } from "../../server.js";
+import {
+  addInspirations,
+  getInspirations,
+  removeDuplicateTitles,
+} from "../db/inspiration.db.js";
 
-export async function test(req, res) {
-  const { title, url } = req.query;
-
-  if (!title || !url) {
-    return res.status(400).json({ error: "Missing title or url" });
-  }
-
-  const sql = "INSERT INTO inspiration (title, image_url) VALUES (?, ?)";
-  db.query(sql, [title, url], (err, result) => {
-    if (err) {
-      logger.error("Insert error:");
-      return res.status(500).json({ error: "Database insert failed" });
-    }
-    res.json({ message: "Data inserted", id: result.insertId });
-  });
-}
+export async function test(req, res) {}
 
 export async function upload(req, res) {
-  try {
-    if (!req.files || req.files.length === 0) {
-      logger.error(`upload [FAIL] - No image files received`);
-      return res.status(400).json({ error: "No image files received." });
-    }
-    logger.info(`upload [START] - Received files [${req.files.length}]`);
-
-    const objectURLs = req.files.map(async (file) => {
-      return await uploadObjectsS3(file, "inspiration/");
-    });
-
-    logger.info(
-      `upload [END] - Fail files [${
-        objectURLs.filter((item) => item === undefined).length
-      }]`
-    );
-    res.status(200).json({
-      message: "Images received successfully",
-    });
-  } catch (error) {
-    logger.error(`upload [FAIL] - ${error}`);
-    res.status(500).json({ error: "Server error while processing images." });
+  if (!req.files || req.files.length === 0) {
+    logger.error(`upload [FAIL] - No image files received`);
+    return res.status(400).json({ error: "No image files received." });
+  }
+  const inspirations = await Promise.all(
+    req.files.map(async (file) => {
+      const objectUrl = await uploadObjectsS3(file, "inspiration/");
+      return { title: file.originalname, imageUrl: objectUrl };
+    })
+  );
+  const newRows = await addInspirations(inspirations);
+  if (newRows) {
+    res.json({ message: `${newRows} image uploaded.` });
+    await removeDuplicateTitles();
+  } else {
+    res.status(500).json({ error: `Server error.` });
   }
 }
 
 export async function get(req, res) {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
 
-    const sql = "SELECT title, image_url FROM inspiration LIMIT ? OFFSET ?";
+  if (page === NaN || limit === NaN || page < 1 || limit < 0) {
+    return res.status(400).json({ error: "Invalid params." });
+  }
 
-    db.query(sql, [limit, offset], (err, results) => {
-      if (err) {
-        logger.error("Database fetch failed");
-        return res.status(500).json({ error: "Database fetch failed" });
-      }
-
-      logger.info("Data fetched successfully");
-      res.json({ page, limit, data: results });
-    });
-  } catch (error) {
-    logger.error("Unexpected error in GET /list");
-    res.status(500).json({ error: "Unexpected server error" });
+  const result = await getInspirations(page, limit);
+  if (result) {
+    res.json(result);
+  } else {
+    res.status(500).json({ error: "Server error." });
   }
 }
