@@ -1,7 +1,25 @@
 import logger from "../utils/logger.js";
 import { uploadObjectsS3 } from "../api/aws.js";
+import { db } from "../../server.js";
 
-export const upload = async (req, res) => {
+export async function test(req, res) {
+  const { title, url } = req.query;
+
+  if (!title || !url) {
+    return res.status(400).json({ error: "Missing title or url" });
+  }
+
+  const sql = "INSERT INTO inspiration (title, image_url) VALUES (?, ?)";
+  db.query(sql, [title, url], (err, result) => {
+    if (err) {
+      logger.error("Insert error:");
+      return res.status(500).json({ error: "Database insert failed" });
+    }
+    res.json({ message: "Data inserted", id: result.insertId });
+  });
+}
+
+export async function upload(req, res) {
   try {
     if (!req.files || req.files.length === 0) {
       logger.error(`upload [FAIL] - No image files received`);
@@ -25,33 +43,27 @@ export const upload = async (req, res) => {
     logger.error(`upload [FAIL] - ${error}`);
     res.status(500).json({ error: "Server error while processing images." });
   }
-};
+}
 
-export const getImages = async (req, res) => {};
+export async function get(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
-// /images?folder={folder_name}
-// 200 {images: ["url1", "url2", ...]}
-// 400 {error: "Missing or invalid 'folder' parameter."}
-// 404 {error: "No images found."}
-// 500 {error: "Failed to get images."}
-// app.get("/images", async (req, res) => {
-//   const folder = req.query.folder;
+    const sql = "SELECT title, image_url FROM inspiration LIMIT ? OFFSET ?";
 
-//   if (!folder || typeof folder !== "string") {
-//     return res
-//       .status(400)
-//       .json({ error: "Missing or invalid 'folder' parameter." });
-//   }
+    db.query(sql, [limit, offset], (err, results) => {
+      if (err) {
+        logger.error("Database fetch failed");
+        return res.status(500).json({ error: "Database fetch failed" });
+      }
 
-//   try {
-//     const urls = await GetAllFilesURL(folder);
-//     if (!urls || urls.length === 0) {
-//       return res.status(404).json({ error: "No images found." });
-//     }
-
-//     res.json({ images: urls });
-//   } catch (err) {
-//     logger.error("Failed to get images:", err);
-//     res.status(500).json({ error: "Failed to get images." });
-//   }
-// });
+      logger.info("Data fetched successfully");
+      res.json({ page, limit, data: results });
+    });
+  } catch (error) {
+    logger.error("Unexpected error in GET /list");
+    res.status(500).json({ error: "Unexpected server error" });
+  }
+}

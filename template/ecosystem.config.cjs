@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "app1",
-      script: "./src/app.js",
+      script: "./server.js",
       env: {
         NODE_ENV: "production", // development | production
         AWS_REGION: "",
@@ -10,6 +10,11 @@ module.exports = {
         AWS_SECRET_ACCESS_KEY: "",
         S3_BUCKET_NAME: "",
         WEB_SERVER_PORT: "",
+        MYSQL_HOST: "",
+        MYSQL_PORT: "",
+        MYSQL_USER: "",
+        MYSQL_PW: "",
+        MYSQL_DB_NAME: "",
       },
     },
   ],
