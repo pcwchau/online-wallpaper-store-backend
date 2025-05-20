@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import logger from "./utils/logger.js";
 import inspirationRoute from "./router/inspiration.router.js";
-// import { GetAllFilesURL } from "./aws-service.js";
 
 const app = express();
 
@@ -17,7 +16,7 @@ app.use((req, res, next) => {
 
 app.use("/inspiration", inspirationRoute);
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({ timestamp: new Date().toISOString() });
 });
 

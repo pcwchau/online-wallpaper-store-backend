@@ -25,5 +25,6 @@ export async function uploadObjectsS3(file, folder) {
     return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
   } catch (error) {
     logger.error(`uploadObjectsS3 [FAIL] - ${error}`);
+    throw error;
   }
 }
