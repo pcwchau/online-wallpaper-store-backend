@@ -42,8 +42,11 @@ pm2 list
 # Deployment
 
 ```sh
-# Go to the project directory
-cd /home/ec2-user/online-wallpaper-store-backend/
+# Initialize a new ec2 instance
+# Follow this to install node.js https://nodejs.org/en/download
+sudo yum install git
+git pull https://github.com/pcwchau/online-wallpaper-store-backend.git
+cd online-wallpaper-store-backend/
 
 # Follow the development guideline
 
