@@ -28,11 +28,11 @@ export default class MySQLDatabase {
     try {
       const [result] = await this.pool.query(sql, params);
       return result.affectedRows;
-    } catch (error) {
-      logger.error(
-        `MySQL insert failed. SQL: ${sql}, Params: ${JSON.stringify(
+    } catch (err) {
+      throw new Error(
+        `MySQL INSERT failed. SQL: ${sql}, Params: ${JSON.stringify(
           params
-        )}, Error: ${error.message}`
+        )}, Error: ${err.message}`
       );
     }
   }
@@ -41,11 +41,11 @@ export default class MySQLDatabase {
     try {
       const [result] = await this.pool.query(sql, params);
       return result;
-    } catch (error) {
-      logger.error(
-        `MySQL select failed. SQL: ${sql}, Params: ${JSON.stringify(
+    } catch (err) {
+      throw new Error(
+        `MySQL SELECT failed. SQL: ${sql}, Params: ${JSON.stringify(
           params
-        )}, Error: ${error.message}`
+        )}, Error: ${err.message}`
       );
     }
   }
@@ -54,11 +54,11 @@ export default class MySQLDatabase {
     try {
       const [result] = await this.pool.query(sql, params);
       return result.affectedRows;
-    } catch (error) {
-      logger.error(
-        `MySQL update failed. SQL: ${sql}, Params: ${JSON.stringify(
+    } catch (err) {
+      throw new Error(
+        `MySQL UPDATE failed. SQL: ${sql}, Params: ${JSON.stringify(
           params
-        )}, Error: ${error.message}`
+        )}, Error: ${err.message}`
       );
     }
   }
@@ -67,11 +67,11 @@ export default class MySQLDatabase {
     try {
       const [result] = await this.pool.query(sql, params);
       return result.affectedRows;
-    } catch (error) {
-      logger.error(
-        `MySQL delete failed. SQL: ${sql}, Params: ${JSON.stringify(
+    } catch (err) {
+      throw new Error(
+        `MySQL DELETE failed. SQL: ${sql}, Params: ${JSON.stringify(
           params
-        )}, Error: ${error.message}`
+        )}, Error: ${err.message}`
       );
     }
   }
@@ -80,8 +80,8 @@ export default class MySQLDatabase {
     try {
       await this.pool.end();
       logger.info("MySQL connection pool closed");
-    } catch (error) {
-      logger.error(`Error closing MySQL pool: ${error.message}`);
+    } catch (err) {
+      logger.error(`Error closing MySQL pool: ${err.message}`);
     }
   }
 }

@@ -62,3 +62,11 @@ Useful links:
 
 - https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-up-node-on-ec2-instance.html
 - https://gist.github.com/clodal/f19fc9f57e9c419f523164a145777d69
+
+# Error handling
+
+All client side error should include `status` (`400`, `404`, ...), `code` and `details`.
+
+All server sider error, such as DB and unexpected error, should not expose any sensitive details.
+
+All errors will finally be logged in Express middleware error handler.

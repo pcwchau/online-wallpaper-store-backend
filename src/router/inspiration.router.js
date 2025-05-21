@@ -1,13 +1,14 @@
 import express from "express";
 import multer from "multer";
-import logger from "../utils/logger.js";
 import { uploadObjectsS3 } from "../api/aws.js";
 import {
   addInspirations,
   getInspirations,
   removeDuplicateTitles,
+  getInspirationCount,
 } from "../db/inspiration.db.js";
 import { isPositiveInteger } from "../utils/validation.js";
+import { successResponse } from "../utils/response.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -29,36 +30,42 @@ const uploadFiles = multer({ storage });
  * 400 - { error: "No image files received." }
  * 500 - { error: "Server error." }
  */
-router.post("/upload", uploadFiles.array("images"), async (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    logger.error(`Upload inspiration images - No image files received`);
-    return res.status(400).json({ error: "No image files received." });
-  }
-  const inspirations = await Promise.all(
-    req.files.map(async (file) => {
-      try {
-        const objectUrl = await uploadObjectsS3(file, "inspiration/");
-        return { title: file.originalname, imageUrl: objectUrl };
-      } catch (error) {
-        return { title: file.originalname, imageUrl: undefined };
-      }
-    })
-  );
-  const successfulInspirations = inspirations.filter(
-    (item) => item.imageUrl !== undefined
-  );
-  const failedInspirations = inspirations.filter(
-    (item) => item.imageUrl === undefined
-  );
+router.post("/upload", uploadFiles.array("images"), async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      throw {
+        statusCode: 400,
+        errorCode: "INVALID_PARAMS",
+        message: "No image files received.",
+      };
+    }
+    const inspirations = await Promise.all(
+      req.files.map(async (file) => {
+        try {
+          const objectUrl = await uploadObjectsS3(file, "inspiration/");
+          return { title: file.originalname, imageUrl: objectUrl };
+        } catch (error) {
+          return { title: file.originalname, imageUrl: undefined };
+        }
+      })
+    );
+    const successfulInspirations = inspirations.filter(
+      (item) => item.imageUrl !== undefined
+    );
+    const failedInspirations = inspirations.filter(
+      (item) => item.imageUrl === undefined
+    );
 
-  const newRows = await addInspirations(successfulInspirations);
-  if (newRows) {
-    res.json({
-      message: `${req.files.length} images received. ${newRows} images uploaded.`,
-    });
+    const newRows = await addInspirations(successfulInspirations);
+    successResponse(
+      res,
+      {},
+      `${req.files.length} images received. ${newRows} images uploaded.`
+    );
+
     await removeDuplicateTitles();
-  } else {
-    res.status(500).json({ error: "Server error." });
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -73,22 +80,42 @@ router.post("/upload", uploadFiles.array("images"), async (req, res) => {
  *
  * Response:
  * 200 - [{"title":"...","image_url":"..."}, ...]
- * 400 - { error: "Invalid params." }
- * 500 - { error: "Server error." }
  */
-router.get("/get", async (req, res) => {
-  const page = parseInt(req.query.page, 10);
-  const limit = parseInt(req.query.limit, 10);
+router.get("/get", async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.limit, 10);
 
-  if (!isPositiveInteger(page) || !isPositiveInteger(limit)) {
-    return res.status(400).json({ error: "Invalid params." });
+    if (!isPositiveInteger(page) || !isPositiveInteger(limit)) {
+      throw {
+        statusCode: 400,
+        errorCode: "INVALID_PARAMS",
+        message: "Positive integer is required for `page` and `limit`.",
+      };
+    }
+    const result = await getInspirations(page, limit);
+    successResponse(res, result, "Get inspiration images successfully.");
+  } catch (err) {
+    next(err);
   }
+});
 
-  const result = await getInspirations(page, limit);
-  if (result !== undefined) {
-    res.json(result);
-  } else {
-    res.status(500).json({ error: "Server error." });
+/**
+ * GET /inspiration/getCount
+ *
+ * Response:
+ * 200 - {"count":3009}
+ */
+router.get("/getCount", async (_req, res, next) => {
+  try {
+    const result = await getInspirationCount();
+    successResponse(
+      res,
+      { count: result[0]["COUNT(*)"] },
+      "Get count of inspiration images successfully."
+    );
+  } catch (err) {
+    next(err);
   }
 });
 
