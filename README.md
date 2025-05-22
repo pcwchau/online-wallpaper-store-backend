@@ -1,64 +1,117 @@
 # Online Wallpaper Store Backend
 
+- [Online Wallpaper Store Backend](#online-wallpaper-store-backend)
+- [Development](#development)
+  - [Initialize](#initialize)
+  - [Develop](#develop)
+- [Production](#production)
+  - [Initialize (Red Hat Enterprise Linux 9)](#initialize-red-hat-enterprise-linux-9)
+  - [Deploy](#deploy)
+- [Error handling](#error-handling)
+
+
+This is a CMS for the online wallpaper store.
+
 # Development
 
-| Service            | Local Port |
-|--------------------|------------|
-| Node.js web server | 3001       |
-| Docker MySQL       | 3002       |
+| Service | Version | Local Port |
+|---------|---------|------------|
+| Node.js | 22.11.0 | 3001       |
+| MySQL   | 8.4.3   | 3002       |
+
+## Initialize
 
 ```sh
-# Initialize the project for the first time
-# Copy /template/ecosystem.config.js to / and update the config
-npm install
-npm install -g pm2
+> Copy /template/ecosystem.config.js to / and update the config.
 
-
-# Start the DB and the web server
-docker compose up -d
-pm2 start ecosystem.config.cjs
+$ npm install
+$ npm install -g pm2
+$ docker compose up -d
 ```
 
+## Develop
+
 ```sh
+$ pm2 start ecosystem.config.cjs
+
 # Restart the web server after update
-pm2 restart ecosystem.config.cjs
+$ pm2 restart ecosystem.config.cjs
 
 # Stop the web server
-pm2 stop app1
+$ pm2 stop app1
 
 # Delete the web server
-pm2 delete app1
+$ pm2 delete app1
 
 # Check logging
-pm2 logs app1
+$ pm2 logs app1
 
 # Clear logging
-pm2 flush
+$ pm2 flush
 
 # Check the web server status
-pm2 list
+$ pm2 list
 ```
 
-# Deployment
+# Production
+
+| Service | Version | Local Port |
+|---------|---------|------------|
+| Node.js | 22.16.0 | 3001       |
+| MySQL   | 8.4.3   | 3002       |
+
+## Initialize (Red Hat Enterprise Linux 9)
 
 ```sh
-# Initialize a new ec2 instance
-# Follow this to install node.js https://nodejs.org/en/download
-sudo yum install git
-git pull https://github.com/pcwchau/online-wallpaper-store-backend.git
-cd online-wallpaper-store-backend/
+# Install Node.js. https://nodejs.org/en/download
+$ sudo yum install unzip
+$ curl -o- https://fnm.vercel.app/install | bash # Then, exit and open a new SSH connection
+$ fnm install 22
 
-# Follow the development guideline
+# Install MySQL. https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/
+$ sodu yum install wget
+$ wget https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+$ sudo yum localinstall mysql84-community-release-el9-1.noarch.rpm
+$ sudo yum install mysql-community-server
 
-# Get update from Git (access token is cached)
-git pull
-npm install # if necessary
-pm2 restart ecosystem.config.cjs  # restart the web server
+# Initialize MySQL.
+$ sudo grep 'temporary password' /var/log/mysqld.log # check root pw
+$ mysql -uroot -p # enter the temporary root pw
+$ ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass4!'; # change the pw
+
+# Start the MySQL server.
+$ sudo su
+$ systemctl start mysqld
+
+# Install git.
+$ sudo yum install git
+
+> Pull the project. Go to the project root directory.
+
+$ cp template/ecosystem.config.cjs ./ # update the config
+$ npm install
+$ npm install -g pm2
+
+# Go to MySQL. Initialize the database.
+mysql> source /home/ec2-user/online-wallpaper-store-backend/schema/inspiration.sql
+
+# Start the server.
+$ pm2 start ecosystem.config.cjs
 
 # Request SSL Certificates (ensure port 80 is open)
 sudo certbot certonly --standalone -d web.beshinegroup.com
 # After receiving SSL cert, ensure they can be accessed
 # Certificates should be renewed automatically
+```
+
+## Deploy
+
+```sh
+> Go to the project root directory.
+
+$ git pull
+$ npm install # if necessary
+$ pm2 restart ecosystem.config.cjs
 ```
 
 Useful links:
