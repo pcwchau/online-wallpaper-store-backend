@@ -22,6 +22,7 @@ This is a CMS for the online wallpaper store.
 ## Initialize
 
 ```sh
+> Install Docker and Node.js.
 > Copy /template/ecosystem.config.js to / and update the config.
 
 $ npm install
@@ -98,8 +99,20 @@ mysql> source /home/ec2-user/online-wallpaper-store-backend/schema/inspiration.s
 # Start the server.
 $ pm2 start ecosystem.config.cjs
 
-# Request SSL Certificates (ensure port 80 is open)
-sudo certbot certonly --standalone -d web.beshinegroup.com
+# Install snapd (for certbot). https://snapcraft.io/docs/installing-snap-on-red-hat
+$ sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+$ sudo dnf upgrade
+$ sudo yum install snapd
+$ sudo systemctl enable --now snapd.socket
+$ sudo ln -s /var/lib/snapd/snap /snap
+
+# Install certbot. https://certbot.eff.org/instructions?ws=other&os=ubuntufocal
+$ sudo snap install --classic certbot
+
+# Request SSL Certificates
+> Map the domain name to the public IP address in the zone editor.
+> Ensure port 80 of the instance is open
+$ sudo certbot certonly --standalone -d domain-name
 # After receiving SSL cert, ensure they can be accessed
 # Certificates should be renewed automatically
 ```

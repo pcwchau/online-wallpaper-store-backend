@@ -13,10 +13,10 @@ if (process.env.NODE_ENV === "production") {
   try {
     const httpsOptions = {
       key: fs.readFileSync(
-        "/etc/letsencrypt/live/web.beshinegroup.com/privkey.pem"
+        "/etc/letsencrypt/live/cms.beshinegroup.com/privkey.pem"
       ),
       cert: fs.readFileSync(
-        "/etc/letsencrypt/live/web.beshinegroup.com/fullchain.pem"
+        "/etc/letsencrypt/live/cms.beshinegroup.com/fullchain.pem"
       ),
     };
 
