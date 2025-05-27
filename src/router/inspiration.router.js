@@ -32,6 +32,14 @@ const uploadFiles = multer({ storage });
  */
 router.post("/upload", uploadFiles.array("images"), async (req, res, next) => {
   try {
+    if (process.env.ENABLE_UPLOAD !== "1") {
+      throw {
+        statusCode: 403,
+        errorCode: "FORBIDDEN",
+        message: "Uploading inspiration image is not allowed.",
+      };
+    }
+
     if (!req.files || req.files.length === 0) {
       throw {
         statusCode: 400,

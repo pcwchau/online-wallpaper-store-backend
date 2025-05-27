@@ -59,7 +59,7 @@ $ pm2 list
 | Service | Version | Local Port |
 |---------|---------|------------|
 | Node.js | 22.16.0 | 3001       |
-| MySQL   | 8.4.3   | 3002       |
+| MySQL   | 8.4.3   | 3306       |
 
 ## Initialize (Red Hat Enterprise Linux 9)
 

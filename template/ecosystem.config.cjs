@@ -15,6 +15,7 @@ module.exports = {
         MYSQL_USER: "",
         MYSQL_PW: "",
         MYSQL_DB_NAME: "",
+        ENABLE_UPLOAD: "1", // 0 | 1
       },
     },
   ],
